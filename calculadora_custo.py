@@ -4,6 +4,8 @@ hora = 10 #valor da mão de obra
 energia_hora = 0.10 #valor gasto em energia/hora
 vida_util = 1 #valor gasto de depreciação da impressora/hora
 valor_embalagem = 5 #valor aproximado gasto em embalagens
+margem_falha = 0.10 #10% do custo para cobrir possíveis reimpressões
+comissao_market = 0.14 #14% de comissão do anúncio em marketplace, partindo do valor maior
 
 def conectar():
     return mysql.connector.connect(
@@ -26,6 +28,7 @@ def criar_tabela():
             margem decimal(10,2) not null,
             custo_tot decimal(10,2) not null,
             valor_final decimal(10,2) not null,
+            valor_com_comissao decimal(10,2) not null,
             lucro decimal(10,2) not null,
             criado_em timestamp default current_timestamp
         )
@@ -34,13 +37,13 @@ def criar_tabela():
     cursor.close()
     conexao.close()
 
-def salvar_produto(nome, valor_filamento, peso, tempo, tempo_prod, margem, custo_tot, valor_final, lucro):
+def salvar_produto(nome, valor_filamento, peso, tempo, tempo_prod, margem, custo_tot, valor_final, valor_com_comissao, lucro):
     conexao = conectar()
     cursor = conexao.cursor()
     cursor.execute('''
-        insert into produtos (nome, valor_filamento, peso, tempo, tempo_prod, margem, custo_tot, valor_final, lucro)
-        values (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-    ''', (nome, valor_filamento, peso, tempo, tempo_prod, margem, custo_tot, valor_final, lucro))
+        insert into produtos (nome, valor_filamento, peso, tempo, tempo_prod, margem, custo_tot, valor_final, valor_com_comissao, lucro)
+        values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ''', (nome, valor_filamento, peso, tempo, tempo_prod, margem, custo_tot, valor_final, valor_com_comissao, lucro))
     conexao.commit()
     cursor.close()
     conexao.close()
@@ -107,8 +110,10 @@ while True:
         desgaste = vida_util * tempo
 
         custo_tot = custo_filam + custo_energia + custo_mobra + desgaste + valor_embalagem
-        valor_final = custo_tot * (1 + margem_lucro)
-        lucro = valor_final - custo_tot
+        custo_ajustado = custo_tot * (1 + margem_falha)
+        valor_final = (custo_ajustado * (1 + margem_lucro))
+        valor_com_comissao = valor_final * (1 + comissao_market)
+        lucro = valor_final - custo_ajustado
 
         print('-')
         sleep(0.6)
@@ -121,14 +126,15 @@ while True:
         print(f'Custo em energia: R${custo_energia:.2f}')
         print(f'Custo mão de obra: R${custo_mobra:.2f}')
         print(f'Custo de desgaste: R${desgaste:.2f}')
-        print(f'Custo total: R${custo_tot:.2f}')
+        print(f'Custo total: R${custo_ajustado:.2f}')
+        print(f'Comissão do Marketplace: R${valor_com_comissao-valor_final:.2f}')
         print('-' * 30)
-        print(f'Preço final sugerido: R${valor_final:.2f}\nLucro de R${lucro:.2f}')
+        print(f'Preço final sugerido: R${valor_com_comissao:.2f}\nLucro de R${lucro:.2f}')
         print('-' * 30)
         salvar = input('Deseja salvar este produto? [S/N] ').strip().upper()
         if salvar == 'S':
             nome = input('Nome do produto: ').strip()
-            salvar_produto(nome, valor_filamento, peso, tempo, tempo_prod, margem, custo_tot, valor_final, lucro)
+            salvar_produto(nome, valor_filamento, peso, tempo, tempo_prod, margem, custo_tot, valor_final, valor_com_comissao, lucro)
             print('Produto salvo com sucesso!')
 
         resp = str(input('Quer continuar? [S/N] ')).strip().upper()
