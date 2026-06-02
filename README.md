@@ -20,15 +20,48 @@ Calculadora para precificação de produtos impressos em 3D, com armazenamento e
 
 ## 🧮 O que é calculado
 
-| Item                  | Descrição                                                       |
-| --------------------- | --------------------------------------------------------------- |
-| Filamento             | Custo com base no peso usado e preço por kg                     |
-| Energia               | Custo por hora de impressão                                     |
-| Mão de obra           | Custo por hora de processamento do produto                      |
-| Desgaste              | Depreciação da impressora por hora de uso                       |
-| Embalagem             | Custo fixo por produto                                          |
-| Margem de falha       | 10% sobre o custo total para cobrir eventuais reimpressões      |
-| Comissão marketplace  | 14% sobre o preço final (média Shopee/Mercado Livre)            |
+| Item                 | Descrição                                                  |
+| -------------------- | ---------------------------------------------------------- |
+| Filamento            | Custo com base no peso usado e preço por kg                |
+| Energia              | Custo por hora de impressão                                |
+| Mão de obra          | Custo por hora de processamento do produto                 |
+| Desgaste             | Depreciação da impressora por hora de uso                  |
+| Embalagem            | Custo fixo por produto                                     |
+| Margem de falha      | 10% sobre o custo total para cobrir eventuais reimpressões |
+| Comissão marketplace | 14% sobre o preço final (média Shopee/Mercado Livre)       |
+
+---
+
+## 🧪 Testes automatizados
+
+O projeto conta com testes automatizados usando **Pytest**, cobrindo a lógica de cálculo de forma isolada do banco de dados.
+
+### Arquivos de teste
+
+| Arquivo               | Descrição                                              |
+| --------------------- | ------------------------------------------------------ |
+| `calculos.py`         | Função de cálculo isolada, independente do banco       |
+| `test_calculadora.py` | Testes automatizados com Pytest                        |
+
+### O que é testado
+
+- Custo do filamento com base no peso e preço por kg
+- Custo de energia por hora de impressão
+- Lucro calculado com margem de lucro aplicada
+
+### Como rodar os testes
+
+```
+pip install pytest
+python -m pytest test_calculadora.py -v
+```
+
+Resultado esperado:
+
+```
+test_calculadora.py::test_custo PASSED   [100%]
+1 passed in 0.02s
+```
 
 ---
 
@@ -44,7 +77,7 @@ cd calculadora-impressao-3d
 ### 2. Instale as dependências
 
 ```
-pip install mysql-connector-python
+pip install mysql-connector-python pytest
 ```
 
 ### 3. Configure o banco de dados
@@ -84,6 +117,7 @@ python calculadora_custo.py
 - Python 3.x
 - MySQL
 - mysql-connector-python
+- pytest
 
 ---
 
@@ -92,3 +126,4 @@ python calculadora_custo.py
 - Python
 - MySQL
 - mysql-connector-python
+- Pytest
