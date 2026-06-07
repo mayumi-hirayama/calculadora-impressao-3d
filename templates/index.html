@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Custo de Impressão 3D</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <h1>🖨️ Calculadora de Custo de Impressão 3D</h1>
+
+    <section class="formulario">
+        <form method="POST" action="/">
+            <label>Valor do filamento/kg: R$
+                <input type="number" name="valor_filamento" step="0.10" required>
+            </label>
+            <label>Gramas utilizadas:
+                <input type="number" name="peso" step="0.01" required>
+            </label>
+            <label>Tempo de impressão (horas):
+                <input type="number" name="tempo" step="0.01" required>
+            </label>
+            <label>Tempo de processamento (minutos):
+                <input type="Number" name="tempo_prod" step="0.01" required>
+            </label>
+            <label>Margem de lucro (%):
+                <input type="number" name="margem" step="0.01" required>
+            </label>
+            <button type="submit">Calcular</button>
+        </form>
+    </section>
+
+{% if resultado %}
+<section class="resultado">
+    <h2>Resultado</h2>
+    <p>Custo do filamento: <strong>R${{ "%.2f"|format(resultado.custo_filam) }}</strong></p>
+    <p>Custo de energia: <strong>R${{ "%.2f"|format(resultado.custo_energia) }}</strong></p>
+    <p>Custo mão de obra: <strong>R${{ "%.2f"|format(resultado.custo_mobra) }}</strong></p>
+    <p>Custo de desgaste: <strong>R${{ "%.2f"|format(resultado.desgaste) }}</strong></p>
+    <p>Custo total ajustado: <strong>R${{ "%.2f"|format(resultado.custo_ajustado) }}</strong></p>
+    <p>Comissão marketplace: <strong>R${{ "%.2f"|format(resultado.comissao) }}</strong></p>
+    <hr>
+    <p>Preço final sugerido: <strong>R${{ "%.2f"|format(resultado.valor_com_comissao) }}</strong></p>
+    <p>Lucro estimado: <strong>R${{ "%.2f"|format(resultado.lucro) }}</strong></p>
+
+    <form method="POST" action="/salvar">
+        <input type="hidden" name="valor_filamento" value="{{ resultado.valor_filamento }}">
+        <input type="hidden" name="peso" value="{{ resultado.peso }}">
+            <input type="hidden" name="tempo" value="{{ resultado.tempo }}">
+            <input type="hidden" name="tempo_prod" value="{{ resultado.tempo_prod }}">
+            <input type="hidden" name="margem" value="{{ resultado.margem }}">
+            <input type="hidden" name="custo_tot" value="{{ resultado.custo_ajustado }}">
+            <input type="hidden" name="valor_final" value="{{ resultado.valor_final }}">
+            <input type="hidden" name="valor_com_comissao" value="{{ resultado.valor_com_comissao }}">
+            <input type="hidden" name="lucro" value="{{ resultado.lucro }}">
+            <label>Nome do produto:
+                <input type="text" name="nome" required>
+            </label>
+            <button type="submit">Salvar produto</button>
+    </form>
+</section>
+{% endif %}
+<section class="produtos">
+        <h2>Produtos salvos</h2>
+        {% if produtos %}
+            <ul>
+            {% for p in produtos %}
+                <li>
+                    [{{ p[0] }}] {{ p[1] }} — R${{ "%.2f"|format(p[2]) }} ({{ p[3].strftime("%d/%m/%Y") }})
+                    <a href="/excluir/{{ p[0] }}">Excluir</a>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>Nenhum produto salvo ainda.</p>
+        {% endif %}
+    </section>
+
+</body>
+</html>
